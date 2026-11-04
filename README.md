@@ -178,3 +178,7 @@ når `inactive_days` er over 0. Ret `legal_updated` og giv brugerne besked ved v
   døgn, eller hvis mere end 20 % (mindst 3) af konti ville blive slettet på én gang.
 - `inactive_dry_run => true` skriver kun i loggen, hvad der ville ske. `--dry-run` og `--live` på
   kommandolinjen overstyrer det.
+
+## Licens
+
+MIT, se [LICENSE](LICENSE).
