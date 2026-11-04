@@ -1,0 +1,148 @@
+/* ==========================================================================
+   caldav.rpix.dk — kontosider (tilmeld, log ind, min konto, nulstil, vilkår).
+   Samme designsprog ("Fjord") som forsiden (home.css) og rpix.dk.
+   ========================================================================== */
+
+:root {
+	--bg: #f3f5f7; --surface: #fff; --surface-2: #eef2f5; --text: #1b2631; --muted: #627180;
+	--border: #dbe2e8; --accent: #23688c; --accent-hover: #17506d; --accent-soft: #e3eff5;
+	--on-accent: #fff; --sand: #c49a52; --sand-soft: #f6efe2;
+	--ok-bg: #e6f4ea; --ok-text: #0b3d1a; --err-bg: #fce8e6; --err-text: #5f1410; --danger: #b3261e;
+	--radius: 14px; --radius-sm: 8px;
+	--shadow-sm: 0 1px 2px rgba(20,40,60,.06);
+	--shadow: 0 1px 2px rgba(20,40,60,.05), 0 10px 30px -12px rgba(20,40,60,.18);
+	--font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	--font-serif: "Iowan Old Style", "Charter", "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+	--measure: 46rem;
+	color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg: #0e151c; --surface: #151f29; --surface-2: #1b2733; --text: #e3e9ee; --muted: #93a3b2;
+		--border: #263544; --accent: #7cbbd9; --accent-hover: #a5d3e8; --accent-soft: #1a3140;
+		--on-accent: #0e151c; --sand: #dcbc82; --sand-soft: #2a2519;
+		--ok-bg: #16301f; --ok-text: #bfe5c9; --err-bg: #3a1a17; --err-text: #f4c7c1; --danger: #e5675d;
+		--shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+		--shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px -12px rgba(0,0,0,.6);
+	}
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+	margin: 0; display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh;
+	background: var(--bg); color: var(--text); font: 16px/1.6 var(--font); -webkit-font-smoothing: antialiased;
+}
+h1, h2 { font-family: var(--font-serif); font-weight: 700; line-height: 1.2; letter-spacing: -.01em; text-wrap: balance; }
+h1 { margin: 0 0 1.25rem; font-size: clamp(1.8rem, 5vw, 2.3rem); }
+h2 { margin: 2.25rem 0 .6rem; font-size: 1.35rem; }
+a { color: var(--accent); text-decoration: none; transition: color .15s, background-color .15s; }
+a:hover { color: var(--accent-hover); }
+p a, li a, label a { text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent); text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+code { font-size: .92em; padding: .1em .35em; background: var(--surface-2); border-radius: 4px; overflow-wrap: anywhere; }  /* deler kun lange adresser, hvis de ikke kan stå på én linje */
+ul { padding-left: 1.3em; }
+li { margin: .35em 0; }
+li::marker { color: var(--sand); }
+
+/* --- Masthead (kompakt) -------------------------------------------------- */
+
+.masthead {
+	color: #fff;
+	background:
+		radial-gradient(120% 120% at 85% 0%, rgba(240,217,168,.35) 0%, transparent 55%),
+		linear-gradient(170deg, #8aa3b5 0%, #5d7488 45%, #2c4558 100%);
+}
+@media (min-width: 600px) {
+	.masthead { width: calc(100% - 2.5rem); max-width: 59.5rem; margin: 1.5rem auto 0; border-radius: var(--radius); box-shadow: var(--shadow); }
+}
+.masthead__inner {
+	display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .9rem 1.5rem;
+	padding: 1.6rem 1.25rem;
+}
+@media (min-width: 600px) { .masthead__inner { padding: 2.25rem 2.25rem 1.75rem; } }
+.masthead__title {
+	font-family: var(--font-serif); font-size: clamp(1.8rem, 5vw, 2.4rem); font-weight: 700; line-height: 1;
+	letter-spacing: -.02em; color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,.25);
+}
+.masthead__title span { color: #f0d9a8; font-weight: 400; }
+.masthead__title:hover { color: #fff; }
+.masthead__nav { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; font-size: .9rem; }
+.masthead__nav > a, .masthead__nav button, .masthead__nav .lang {
+	padding: .3em .9em; color: #fff; font: inherit; font-weight: 500; line-height: 1.6;
+	background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.25); border-radius: 999px; cursor: pointer;
+}
+.masthead__nav > a:hover, .masthead__nav button:hover { color: #fff; background: rgba(255,255,255,.26); }
+.masthead__nav .lang { cursor: default; }
+.masthead__nav .lang a { color: #fff; text-decoration: underline; }
+
+/* --- Indhold ------------------------------------------------------------- */
+
+.content { flex: 1; width: 100%; max-width: var(--measure); margin: 0 auto; padding: 1.5rem 1.25rem 4rem; }
+.panel {
+	padding: 2rem clamp(1.25rem, 5vw, 2.75rem) 2.25rem; background: var(--surface);
+	border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.panel > :last-child { margin-bottom: 0; }
+.panel p { margin: 0 0 1em; }
+
+form { max-width: 28rem; }
+form.inline { display: inline; max-width: none; }
+label { display: block; margin: 0 0 1rem; font-weight: 600; font-size: .95rem; }
+input[type=text], input[type=email], input[type=password] {
+	display: block; width: 100%; margin-top: .3rem; padding: .6rem .8rem;
+	font: inherit; font-weight: 400; color: var(--text); background: var(--surface);
+	border: 1px solid var(--border); border-radius: var(--radius-sm);
+	transition: border-color .15s, box-shadow .15s;
+}
+input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+label.check { display: flex; gap: .6rem; align-items: flex-start; font-weight: 400; }
+label.check input { margin-top: .35em; accent-color: var(--accent); }
+
+button {
+	font: inherit; font-weight: 600; cursor: pointer; padding: .6em 1.4em;
+	color: var(--on-accent); background: var(--accent); border: 1px solid var(--accent); border-radius: 999px;
+	box-shadow: var(--shadow-sm); transition: background-color .15s, transform .15s;
+}
+button:hover { background: var(--accent-hover); border-color: var(--accent-hover); transform: translateY(-1px); }
+button.danger { color: #fff; background: var(--danger); border-color: var(--danger); }
+button.danger:hover { background: color-mix(in srgb, var(--danger) 85%, #000); }
+button.link { padding: 0; color: var(--accent); background: none; border: 0; box-shadow: none; text-decoration: underline; }
+.masthead__nav button:hover { transform: none; }
+
+.ok, .err { padding: .75rem 1rem; border-radius: var(--radius-sm); }
+.ok { background: var(--ok-bg); color: var(--ok-text); }
+.err { background: var(--err-bg); color: var(--err-text); }
+.small { font-size: .9rem; color: var(--muted); }
+.hp { position: absolute; left: -9999px; height: 0; overflow: hidden; }
+
+/* --- Footer -------------------------------------------------------------- */
+
+.site-footer { border-top: 1px solid var(--border); color: var(--muted); font-size: .9rem; }
+.site-footer__inner { max-width: 62rem; margin: 0 auto; padding: 1.5rem 1.25rem 2.5rem;
+	display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; }
+.site-footer nav { display: flex; flex-wrap: wrap; gap: .4rem 1.25rem; }
+
+@media (max-width: 600px) {
+	.content { padding: 1rem .75rem 3rem; }
+	.panel { padding: 1.5rem 1.15rem 1.75rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+	*, *::before, *::after { transition: none !important; }
+}
+.panel form + p { margin-top: 1.5rem; }  /* fx "Allerede bruger?" under tilmeldingen */
+
+/* knap-links (fx "Åbn WebNotes" / "Åbn Radicale" på Min konto), samme stil som på forsiden */
+.actions { display: flex; flex-wrap: wrap; gap: .6rem; }
+.btn {
+	display: inline-flex; align-items: center; gap: .4em; padding: .6em 1.4em; font-weight: 600; text-decoration: none;
+	color: var(--on-accent); background: var(--accent); border: 1px solid var(--accent); border-radius: 999px;
+	box-shadow: var(--shadow-sm); transition: background-color .15s, transform .15s;
+}
+.btn:hover { color: var(--on-accent); background: var(--accent-hover); border-color: var(--accent-hover); transform: translateY(-1px); }
+.btn--ghost { color: var(--accent); background: transparent; box-shadow: none; }
+.btn--ghost:hover { color: var(--accent-hover); background: var(--accent-soft); border-color: var(--accent); }
+/* som de gennemsigtige knapper i den blå top på forsiden, men på hvid baggrund */
+.btn--slate { color: #fff; background: #5d7488; border-color: #5d7488; }
+.btn--slate:hover { color: #fff; background: #4a5f71; border-color: #4a5f71; }
+.panel .login-hint { margin: 1rem 0 0; font-size: .88rem; color: var(--muted); }
