@@ -1,34 +1,36 @@
-# Kalenderportal til Radicale (caldav.rpix.dk)
+# Calendar portal for Radicale (caldav.rpix.dk)
 
-Lille PHP-app der lader folk oprette en Radicale-konto med e-mailbekræftelse,
-nulstille glemt adgangskode og slette konto + data. Brugerne skrives til Radicales htpasswd-fil (bcrypt).
+**English** | [Dansk](README.da.md)
 
-Krav: PHP 8.1+, `php-sqlite3`, `php-curl`, og `mail()` der kan sende (postfix på samme server).
+Small PHP app that lets people create a Radicale account with email verification,
+reset a forgotten password and delete their account + data. Users are written to Radicale's htpasswd file (bcrypt).
 
-## Mappestruktur
+Requirements: PHP 8.1+, `php-sqlite3`, `php-curl`, and a working `mail()` (postfix on the same server).
+
+## Directory structure
 
 ```
 /var/www/rpix.dk/caldav/
-├── config.php        (kopi af config.sample.php, tilpasset)
+├── config.php        (copy of config.sample.php, customised)
 ├── lib.php
-├── lang.php          (oversættelser da/en; dansk er standard, valget gemmes i en cookie)
-├── home_layout.php   (fælles top/sidefod til informationssiderne index.php og davnotes.php)
-├── data/             (SQLite + lock-fil, uden for webroden)
-└── public/           (DocumentRoot: index.php og davnotes.php (information, home.css),
+├── lang.php          (translations da/en; Danish is the default, the choice is stored in a cookie)
+├── home_layout.php   (shared header/footer for the information pages index.php and davnotes.php)
+├── data/             (SQLite + lock file, outside the web root)
+└── public/           (DocumentRoot: index.php and davnotes.php (information, home.css),
                        register.php, verify.php, login.php, logout.php, account.php,
-                       reset.php, privacy.php, terms.php (konto, style.css))
+                       reset.php, privacy.php, terms.php (account, style.css))
 ```
 
-## 1. Rettigheder til htpasswd
+## 1. htpasswd permissions
 
-PHP (www-data) skal kunne skrive filen, Radicale skal kunne læse den. Appen skriver atomisk via en
-temp-fil i samme mappe, så **mappen** skal være skrivbar for www-data. Brug en dedikeret mappe med
-setgid, så nye filer arves til Radicales gruppe:
+PHP (www-data) must be able to write the file, and Radicale must be able to read it. The app writes atomically via a
+temp file in the same directory, so the **directory** must be writable by www-data. Use a dedicated directory with
+setgid so new files inherit Radicale's group:
 
 ```bash
 sudo mkdir -p /etc/radicale/users
-sudo cp <din-nuværende-htpasswd> /etc/radicale/users/users
-sudo chown -R www-data:radicale /etc/radicale/users      # ret "radicale" til Radicales gruppe
+sudo cp <your-current-htpasswd> /etc/radicale/users/users
+sudo chown -R www-data:radicale /etc/radicale/users      # change "radicale" to Radicale's group
 sudo chmod 2775 /etc/radicale/users
 sudo chmod 640 /etc/radicale/users/users
 
@@ -37,9 +39,9 @@ sudo chown www-data:www-data /var/www/rpix.dk/caldav/data
 sudo chmod 750 /var/www/rpix.dk/caldav/data
 ```
 
-Bemærk: appen omskriver filen ved hver ændring og fjerner derfor evt. kommentarlinjer.
-Eksisterende brugere med andre hashformater end bcrypt (`$2y$`) virker stadig i Radicale, men kan ikke
-logge ind i portalen. Lav dem om med `htpasswd -B`.
+Note: the app rewrites the file on every change and therefore removes any comment lines.
+Existing users with hash formats other than bcrypt (`$2y$`) still work in Radicale, but cannot
+log in to the portal. Convert them with `htpasswd -B`.
 
 ## 2. Radicale (`config`)
 
@@ -54,23 +56,23 @@ delay = 1
 type = owner_only
 ```
 
-Radicale kræver `passlib` og `bcrypt` til bcrypt (`pip install passlib bcrypt` i Radicales miljø).
-Genstart Radicale én gang efter ændringen. Herefter genindlæses htpasswd løbende.
+Radicale needs `passlib` and `bcrypt` for bcrypt (`pip install passlib bcrypt` in Radicale's environment).
+Restart Radicale once after the change. After that, htpasswd is reloaded continuously.
 
-## 3. Portalens config
+## 3. Portal config
 
 ```bash
 cp config.sample.php config.php
 ```
 
-Ret `from_email`, `max_users` m.m. `radicale_url` er den adresse, brugerne får vist som server
-(`https://caldav.rpix.dk/dav`, se `/dav/` i vhosten nedenfor). `radicale_internal_url` kan sættes til
-`http://127.0.0.1:5232`, hvis Radicale lytter lokalt (så sletning ikke går ud over nettet).
+Adjust `from_email`, `max_users` etc. `radicale_url` is the address shown to users as the server
+(`https://caldav.rpix.dk/dav`, see `/dav/` in the vhost below). `radicale_internal_url` can be set to
+`http://127.0.0.1:5232` if Radicale listens locally (so deletion does not go over the network).
 
-## 4. Apache-vhost
+## 4. Apache vhost
 
-Sådan ser `/etc/apache2/sites-available/caldav.rpix.dk-le-ssl.conf` ud på serveren. Http-udgaven
-(`caldav.rpix.dk.conf`) sender bare alt videre til https.
+This is what `/etc/apache2/sites-available/caldav.rpix.dk-le-ssl.conf` looks like on the server. The http version
+(`caldav.rpix.dk.conf`) just redirects everything to https.
 
 ```apache
 <IfModule mod_ssl.c>
@@ -88,8 +90,8 @@ Sådan ser `/etc/apache2/sites-available/caldav.rpix.dk-le-ssl.conf` ud på serv
 
     Header always set Strict-Transport-Security "max-age=31536000"
 
-    # WebNotes (webklient til VJOURNAL) på /notes/. Den taler med Radicale via /dav/ nedenfor.
-    # Gammel adresse: /noter/ sender videre til /notes/
+    # WebNotes (web client for VJOURNAL) at /notes/. It talks to Radicale via /dav/ below.
+    # Old address: /noter/ redirects to /notes/
     RedirectMatch 301 ^/noter(/.*)?$ /notes$1
     Alias /notes /var/www/rpix.dk/notes
     <Directory /var/www/rpix.dk/notes>
@@ -102,11 +104,11 @@ Sådan ser `/etc/apache2/sites-available/caldav.rpix.dk-le-ssl.conf` ud på serv
         Header always set Referrer-Policy "no-referrer"
     </Location>
 
-    # Autodiscovery (RFC 6764): programmer, der kun får "caldav.rpix.dk", finder selv Radicale
+    # Autodiscovery (RFC 6764): clients given only "caldav.rpix.dk" find Radicale by themselves
     RedirectMatch 301 ^/\.well-known/(caldav|carddav)/?$ /dav/
 
-    # Radicale under /dav/ (portalen ligger på /). X-Script-Name får Radicale til at sætte /dav
-    # foran sine adresser, så https://caldav.rpix.dk/dav/ kan bruges i kalenderprogrammer.
+    # Radicale under /dav/ (the portal is at /). X-Script-Name makes Radicale prefix its
+    # addresses with /dav, so https://caldav.rpix.dk/dav/ can be used in calendar clients.
     RedirectMatch 301 ^/dav$ /dav/
     ProxyPass /dav/ http://localhost:5232/ retry=0
     ProxyPassReverse /dav/ http://localhost:5232/
@@ -116,7 +118,7 @@ Sådan ser `/etc/apache2/sites-available/caldav.rpix.dk-le-ssl.conf` ud på serv
         RequestHeader set X-Forwarded-Proto expr=%{REQUEST_SCHEME}
     </Location>
 
-    # fælles certbot-certifikat for rpix.dk (dækker også caldav.rpix.dk)
+    # shared certbot certificate for rpix.dk (also covers caldav.rpix.dk)
     Include /etc/letsencrypt/options-ssl-apache.conf
     SSLCertificateFile /etc/letsencrypt/live/rpix.dk/fullchain.pem
     SSLCertificateKeyFile /etc/letsencrypt/live/rpix.dk/privkey.pem
@@ -124,61 +126,61 @@ Sådan ser `/etc/apache2/sites-available/caldav.rpix.dk-le-ssl.conf` ud på serv
 </IfModule>
 ```
 
-`config.php`, `lib.php` og `data/` ligger uden for DocumentRoot og kan ikke hentes udefra.
+`config.php`, `lib.php` and `data/` are outside the DocumentRoot and cannot be fetched from outside.
 
-Kræver `mod_alias`, `mod_proxy`, `mod_proxy_http` og `mod_headers`. Om WebNotes: se README i `/var/www/rpix.dk/notes`.
+Requires `mod_alias`, `mod_proxy`, `mod_proxy_http` and `mod_headers`. For WebNotes, see [lianergoist/webnotes](https://github.com/lianergoist/webnotes).
 
 ## 5. Mail
 
-Bekræftelses- og nulstillingsmails sendes med `mail()` fra `noreply@rpix.dk`. Sørg for SPF og DKIM på
-rpix.dk, ellers havner de nemt i spam hos Gmail/Outlook.
+Verification and reset emails are sent with `mail()` from `noreply@rpix.dk`. Make sure SPF and DKIM are set up for
+rpix.dk, otherwise they easily end up in spam at Gmail/Outlook.
 
-## 6. Test før du åbner for andre
+## 6. Test before opening to others
 
-1. Opret en testkonto, bekræft via mailen, log ind i en kalenderklient.
-2. Opret en kalender i klienten, og slet så kontoen i portalen. Tjek at mappen under
-   `collection-root/<bruger>` er væk.
-   Sletningen sker med HTTP `DELETE` på `/<bruger>/` med brugerens eget login. Hvis Radicale afviser det
-   hos dig, bliver kontoen ikke slettet, og brugeren får en fejl, så der ikke efterlades forældreløse data.
-3. Prøv "glemt adgangskode".
-4. Overvej fail2ban på Radicales logfil (mislykkede logins) ud over portalens indbyggede forsøgsgrænser.
+1. Create a test account, verify via the email, log in from a calendar client.
+2. Create a calendar in the client, then delete the account in the portal. Check that the directory under
+   `collection-root/<user>` is gone.
+   Deletion is done with HTTP `DELETE` on `/<user>/` using the user's own login. If Radicale rejects this
+   on your setup, the account is not deleted and the user gets an error, so no orphaned data is left behind.
+3. Try "forgot password".
+4. Consider fail2ban on Radicale's log file (failed logins) in addition to the portal's built-in rate limits.
 
-## Sikkerhed i korthed
+## Security in brief
 
-- Adgangskoder gemmes kun som bcrypt-hash (også i ventende tilmeldinger); tokens gemmes som SHA-256.
-- Bekræftelse og nulstilling kræver en POST (mailscannere kan ikke "bruge" linket ved at hente det).
-- CSRF-token på alle formularer, sessionscookie med Secure/HttpOnly/SameSite, CSP-header.
-- Forsøgsgrænser pr. IP, pr. konto og pr. mailadresse; honeypot-felt mod simple bots.
-- Svar afslører ikke, om en e-mailadresse allerede har en konto.
-- Sletning af konto kræver nuværende adgangskode.
+- Passwords are stored only as bcrypt hashes (also in pending sign-ups); tokens are stored as SHA-256.
+- Verification and reset require a POST (mail scanners cannot "use" the link by fetching it).
+- CSRF token on all forms, session cookie with Secure/HttpOnly/SameSite, CSP header.
+- Rate limits per IP, per account and per email address; honeypot field against simple bots.
+- Responses do not reveal whether an email address already has an account.
+- Deleting an account requires the current password.
 
-## Privatlivspolitik og brugsvilkår
+## Privacy policy and terms of use
 
-`public/privacy.php` og `public/terms.php` viser teksterne fra `legal.php` (da/en). Navn, kontaktmail,
-hostingfirma og opbevaringstider står i `config.php` (`controller_name`, `contact_email`,
+`public/privacy.php` and `public/terms.php` show the texts from `legal.php` (da/en). Name, contact email,
+hosting provider and retention periods are set in `config.php` (`controller_name`, `contact_email`,
 `hosting_provider`, `web_log_days`, `server_log_days`, `inactive_days`, `legal_updated`).
-Ved tilmelding skal brugeren sætte kryds ved vilkårene. Afsnittet om sletning af inaktive konti vises kun,
-når `inactive_days` er over 0. Ret `legal_updated` og giv brugerne besked ved væsentlige ændringer.
+At sign-up the user must tick the terms checkbox. The section about deleting inactive accounts is only shown
+when `inactive_days` is above 0. Update `legal_updated` and notify users of significant changes.
 
-`server_log_days` skal passe med journald, f.eks. `/etc/systemd/journald.conf.d/retention.conf`:
-`[Journal]` / `MaxRetentionSec=3month`, og derefter `systemctl restart systemd-journald`.
+`server_log_days` must match journald, e.g. `/etc/systemd/journald.conf.d/retention.conf`:
+`[Journal]` / `MaxRetentionSec=3month`, followed by `systemctl restart systemd-journald`.
 
-## Sletning af inaktive konti
+## Deleting inactive accounts
 
-`bin/inactive.php` køres hver nat kl. 4.17 som root fra `/etc/cron.d/caldav-inactive`. Loggen ses med
+`bin/inactive.php` runs every night at 4:17 as root from `/etc/cron.d/caldav-inactive`. The log can be viewed with
 `journalctl -t caldav-inactive`.
 
-- Aktivitet = et vellykket login i Radicale (alle synkroniseringer) eller et login i portalen.
-- Advarsel på mail `inactive_warn_days` før sletning. Der slettes tidligst `inactive_warn_days` efter advarslen.
-- Ved sletning fjernes brugeren fra htpasswd, og data flyttes til `/var/lib/radicale/deleted/`, hvor de
-  ligger i `inactive_keep_days` dage. Fortryd: flyt mappen tilbage til `collection-root/<bruger>` og opret
-  brugeren igen.
-- `inactive_exempt` slettes aldrig. Konti, hvis navn ikke er en mailadresse, slettes heller ikke automatisk.
-- Nødstop (mail til `contact_email`): hvis journalen ikke kan læses, hvis der ikke er set et login i 3
-  døgn, eller hvis mere end 20 % (mindst 3) af konti ville blive slettet på én gang.
-- `inactive_dry_run => true` skriver kun i loggen, hvad der ville ske. `--dry-run` og `--live` på
-  kommandolinjen overstyrer det.
+- Activity = a successful login to Radicale (any sync) or a login to the portal.
+- A warning is emailed `inactive_warn_days` before deletion. Deletion happens no earlier than `inactive_warn_days` after the warning.
+- On deletion, the user is removed from htpasswd and the data is moved to `/var/lib/radicale/deleted/`, where it
+  stays for `inactive_keep_days` days. To undo: move the directory back to `collection-root/<user>` and recreate
+  the user.
+- `inactive_exempt` accounts are never deleted. Accounts whose name is not an email address are not deleted automatically either.
+- Emergency stop (email to `contact_email`): if the journal cannot be read, if no login has been seen for 3
+  days, or if more than 20 % (at least 3) of the accounts would be deleted at once.
+- `inactive_dry_run => true` only logs what would happen. `--dry-run` and `--live` on
+  the command line override it.
 
-## Licens
+## License
 
-MIT, se [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE).
