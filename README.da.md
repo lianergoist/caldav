@@ -107,6 +107,12 @@ Sådan ser `/etc/apache2/sites-available/caldav.rpix.dk-le-ssl.conf` ud på serv
     # Autodiscovery (RFC 6764): programmer, der kun får "caldav.rpix.dk", finder selv Radicale
     RedirectMatch 301 ^/\.well-known/(caldav|carddav)/?$ /dav/
 
+    # DAV-klienter (fx DavNotes), der får https://caldav.rpix.dk, spørger med PROPFIND på /.
+    # Uden dette svarer portalen 200 med HTML. Browsere (GET) får stadig portalen.
+    RewriteEngine On
+    RewriteCond %{REQUEST_METHOD} ^(PROPFIND|REPORT)$
+    RewriteRule ^/?$ /dav/ [R=301,L]
+
     # Radicale under /dav/ (portalen ligger på /). X-Script-Name får Radicale til at sætte /dav
     # foran sine adresser, så https://caldav.rpix.dk/dav/ kan bruges i kalenderprogrammer.
     RedirectMatch 301 ^/dav$ /dav/
@@ -128,7 +134,7 @@ Sådan ser `/etc/apache2/sites-available/caldav.rpix.dk-le-ssl.conf` ud på serv
 
 `config.php`, `lib.php` og `data/` ligger uden for DocumentRoot og kan ikke hentes udefra.
 
-Kræver `mod_alias`, `mod_proxy`, `mod_proxy_http` og `mod_headers`. Om WebNotes: se README i `/var/www/rpix.dk/notes`.
+Kræver `mod_alias`, `mod_rewrite`, `mod_proxy`, `mod_proxy_http` og `mod_headers`. Om WebNotes: se README i `/var/www/rpix.dk/notes`.
 
 ## 5. Mail
 

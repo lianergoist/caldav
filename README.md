@@ -107,6 +107,12 @@ This is what `/etc/apache2/sites-available/caldav.rpix.dk-le-ssl.conf` looks lik
     # Autodiscovery (RFC 6764): clients given only "caldav.rpix.dk" find Radicale by themselves
     RedirectMatch 301 ^/\.well-known/(caldav|carddav)/?$ /dav/
 
+    # DAV clients (e.g. DavNotes) given just https://caldav.rpix.dk send PROPFIND to /.
+    # Without this the portal answers 200 with HTML. Browsers (GET) still get the portal.
+    RewriteEngine On
+    RewriteCond %{REQUEST_METHOD} ^(PROPFIND|REPORT)$
+    RewriteRule ^/?$ /dav/ [R=301,L]
+
     # Radicale under /dav/ (the portal is at /). X-Script-Name makes Radicale prefix its
     # addresses with /dav, so https://caldav.rpix.dk/dav/ can be used in calendar clients.
     RedirectMatch 301 ^/dav$ /dav/
@@ -128,7 +134,7 @@ This is what `/etc/apache2/sites-available/caldav.rpix.dk-le-ssl.conf` looks lik
 
 `config.php`, `lib.php` and `data/` are outside the DocumentRoot and cannot be fetched from outside.
 
-Requires `mod_alias`, `mod_proxy`, `mod_proxy_http` and `mod_headers`. For WebNotes, see [lianergoist/webnotes](https://github.com/lianergoist/webnotes).
+Requires `mod_alias`, `mod_rewrite`, `mod_proxy`, `mod_proxy_http` and `mod_headers`. For WebNotes, see [lianergoist/webnotes](https://github.com/lianergoist/webnotes).
 
 ## 5. Mail
 
