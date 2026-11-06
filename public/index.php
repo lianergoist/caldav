@@ -89,7 +89,7 @@ $textsByLanguage = [
         'Der er et begrænset antal pladser, og ingen garanti for oppetid eller backup. Hav altid selv en kopi af det vigtigste.',
     ],
     'data_inactive_deletion' => 'Konti, der ikke har været brugt i %d dage, slettes automatisk. Du får en mail inden. Det tæller som brug, når et program synkroniserer.',
-    'data_read_more_html' => 'Læs mere i <a href="privacy.php">privatlivspolitikken</a> og <a href="terms.php">brugsvilkårene</a>.',
+    'data_read_more_html' => 'Læs svarene på <a href="faq.php">de oftest stillede spørgsmål om tillid</a>, og læs mere i <a href="privacy.php">privatlivspolitikken</a> og <a href="terms.php">brugsvilkårene</a>.',
     'behind_the_service_html'   => 'Bag tjenesten står <a href="https://radicale.org">Radicale</a>, en lille open source-server til CalDAV og CardDAV, og en lille kontoportal, jeg selv har skrevet.',
 
     'signup_box_heading'    => 'Flyt din kalender hjem',
@@ -164,7 +164,7 @@ $textsByLanguage = [
         'There is a limited number of places, and no guarantee of uptime or backup. Always keep your own copy of what matters.',
     ],
     'data_inactive_deletion' => 'Accounts not used for %d days are deleted automatically. You get an email first. A program syncing counts as use.',
-    'data_read_more_html' => 'Read more in the <a href="privacy.php">privacy policy</a> and the <a href="terms.php">terms of use</a>.',
+    'data_read_more_html' => 'See the <a href="faq.php">answers to common questions about trust</a>, and read more in the <a href="privacy.php">privacy policy</a> and the <a href="terms.php">terms of use</a>.',
     'behind_the_service_html'   => 'Behind the service is <a href="https://radicale.org">Radicale</a>, a small open source CalDAV and CardDAV server, and a small account portal I wrote myself.',
 
     'signup_box_heading'    => 'Bring your calendar home',

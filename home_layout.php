@@ -109,6 +109,7 @@ function home_foot(): void
 		<nav>
 			<a href="index.php">caldav.rpix.dk</a>
 			<a href="davnotes.php">DavNotes</a>
+			<a href="faq.php"><?= th('faq_title') ?></a>
 			<a href="privacy.php"><?= th('privacy_title') ?></a>
 			<a href="terms.php"><?= th('terms_title') ?></a>
 			<a href="mailto:<?= h((string)cfg('contact_email')) ?>"><?= h(home_t('contact')) ?></a>

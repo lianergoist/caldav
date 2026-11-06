@@ -423,6 +423,7 @@ function page_foot(): void
        . '<span>&copy; ' . date('Y') . ' <a href="https://rpix.dk/">rpix.dk</a></span><nav>'
        . '<a href="index.php">' . th('site_name') . '</a>'
        . '<a href="privacy.php">' . th('privacy_title') . '</a>'
+       . '<a href="faq.php">' . th('faq_title') . '</a>'
        . '<a href="terms.php">' . th('terms_title') . '</a></nav></div></footer>';
     echo '</body></html>';
 }

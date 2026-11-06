@@ -66,7 +66,12 @@ function legal_fill(string $html): string
         '{updated}'      => h(legal_date((string)legal_cfg('legal_updated'))),
         '{datatilsynet}' => '<a href="' . $datatilsynetUrl . '">' . str_replace('https://', '', $datatilsynetUrl) . '</a>',
         '{account}'      => '<a href="account.php">' . th('nav_account') . '</a>',
-        '{privacy}'      => '<a href="privacy.php">' . th('privacy_title') . '</a>',
+        '{privacy}'      => '<a href="privacy.php">' . th('reg_accept_privacy') . '</a>',
+        '{terms}'        => '<a href="terms.php">' . th('reg_accept_terms') . '</a>',
+        '{minpw}'        => (string)(int)cfg('min_password'),
+        '{source}'       => '<a href="https://github.com/lianergoist/caldav">github.com/lianergoist/caldav</a>',
+        '{radicale}'     => '<a href="https://radicale.org">Radicale</a>',
+        '{davnotes}'     => '<a href="davnotes.php">DavNotes</a>',
     ]);
 }
 
@@ -202,6 +207,53 @@ function legal_texts(): array
                     ]],
                 ],
             ],
+            'faq' => [
+                'intro' => 'Det er rimeligt at være skeptisk over for en gratis tjeneste, der skal passe på din kalender. Her er de ærlige svar på det, folk oftest spørger om. Mangler du et svar, så skriv til {email}.',
+                'sections' => [
+                    ['heading' => 'Hvem står bag?', 'items' => [
+                        'Jeg hedder {name} og driver caldav.rpix.dk som privatperson i min fritid. Der er ikke noget firma, ingen investorer og ingen kunder bag. Du kan skrive direkte til mig på {email}.',
+                    ]],
+                    ['heading' => 'Hvorfor er det gratis? Hvad er ulempen?', 'items' => [
+                        'Det er et fritidsprojekt uden kommercielt formål. Der er ingen reklamer, ingen sporing og ingen analyseværktøjer, og dine oplysninger bliver hverken solgt eller delt med nogen.',
+                        'Ulempen er, at der ikke er nogen garanti. Tjenesten leveres, som den er, uden løfter om oppetid eller backup, og den er kun til privat brug. Se {terms}. Når det er sagt, så kan du godt forvente høj oppetid og god service.',
+                    ]],
+                    ['heading' => 'Hvor står serveren?', 'items' => [
+                        'Hos {hoster}. Data sendes ikke ud af EU/EØS. Hver nat tages en sikkerhedskopi til en server i Danmark, som jeg selv har ansvaret for.',
+                        'Mails fra tjenesten sendes direkte fra serveren til din mailudbyder, uden en ekstern mailtjeneste ind imellem.',
+                    ]],
+                    ['heading' => 'Kan du læse mine kalendere, kontakter og noter?', 'items' => [
+                        'Ja, teknisk set. CalDAV og CardDAV har ingen end-to-end-kryptering. Data krypteres på vejen mellem dig og serveren (HTTPS), men de ligger ukrypteret på serverens disk. Sådan er det også hos de fleste andre kalenderudbydere.',
+                        'Jeg åbner ikke dit indhold, medmindre du selv beder om hjælp, det er nødvendigt for at rette en fejl, eller loven kræver det. Men det er et løfte og ikke en teknisk garanti. Læg ikke noget på serveren, du ikke vil kunne leve med, at administratoren i princippet kan se.',
+                    ]],
+                    ['heading' => 'Hvad bliver logget?', 'items' => [
+                        'Tidspunkt, IP-adresse, brugernavn, hvilken adresse på serveren der blev spurgt efter, og hvilket program der blev brugt. Indholdet af dine aftaler, kontakter og noter står ikke i loggene. Webserverens logs gemmes i højst {weblog} dage, og kalenderserverens i højst {serverlog} dage.',
+                        'Portalen sætter kun to nødvendige cookies: én til at holde dig logget ind og én til at huske dit sprogvalg.',
+                    ]],
+                    ['heading' => 'Hvordan er min adgangskode beskyttet?', 'items' => [
+                        'Den gemmes som en bcrypt-hash, så ingen kan læse den, heller ikke jeg. Den skal være på mindst {minpw} tegn, og portalen spærrer midlertidigt efter for mange forkerte login-forsøg.',
+                        'Der er ingen tofaktorgodkendelse, fordi kalenderprogrammer logger ind med brugernavn og adgangskode. Brug derfor en adgangskode, du ikke bruger andre steder.',
+                    ]],
+                    ['heading' => 'Kan jeg komme ud igen?', 'items' => [
+                        'Ja. Dine data ligger i åbne standardformater (iCalendar og vCard), så du kan flytte dem til en hvilken som helst anden CalDAV/CardDAV-server. Du kan eksportere .ics- og .vcf-filer fra Radicales webgrænseflade eller fra dit kalenderprogram.',
+                        'Du kan slette din konto og alt indhold på siden {account}. Så slettes det med det samme på serveren, og det forsvinder fra sikkerhedskopierne inden for {backup} dage.',
+                    ]],
+                    ['heading' => 'Hvad sker der, hvis du lukker tjenesten?', 'items' => [
+                        'Så får du mindst 30 dages varsel på mail, så du kan nå at flytte dine data.',
+                        ['if' => 'inactive', 'paragraph' => 'Bemærk også, at konti, der ikke har været brugt i {inactive} dage, slettes automatisk. Du får en mail inden, og det tæller som brug, når et kalenderprogram synkroniserer.'],
+                        'Der er et begrænset antal pladser, så serveren ikke bliver overbelastet, og så jeg kan overskue at drive den.',
+                    ]],
+                    ['heading' => 'Kan jeg se koden?', 'items' => [
+                        'Selve kalenderserveren er {radicale}, en udbredt open source-server til CalDAV og CardDAV. Kontoportalen, som klarer tilmelding, nulstilling og sletning, har jeg skrevet selv, og koden ligger på {source}. Det samme gør koden til {davnotes} og WebNotes.',
+                        'Du kan ikke selv tjekke, at det er præcis den kode, der kører på serveren. Men det hele er åben kildekode, så du kan læse, hvordan det virker, og køre det selv.',
+                    ]],
+                    ['heading' => 'Jeg vil hellere selv have kontrollen', 'items' => [
+                        'Godt. Det er den bedste løsning, hvis du har mulighed for det. {radicale} er let at installere på din egen server eller en Raspberry Pi, og {davnotes} virker med alle CalDAV-servere, der understøtter noter (VJOURNAL), fx Radicale og Nextcloud. caldav.rpix.dk er tænkt til dem, der ikke har lyst til eller mulighed for at drive deres egen server.',
+                    ]],
+                    ['heading' => 'Hvad sker der, hvis serveren bliver hacket?', 'items' => [
+                        'Sker der et brud på sikkerheden, som kan berøre dine oplysninger, anmelder jeg det til Datatilsynet, og du får besked, når reglerne kræver det. Læs mere i {privacy}.',
+                    ]],
+                ],
+            ],
         ],
 
         'en' => [
@@ -293,6 +345,53 @@ function legal_texts(): array
                     ]],
                     ['heading' => 'Governing law', 'items' => [
                         'These terms are governed by Danish law.',
+                    ]],
+                ],
+            ],
+            'faq' => [
+                'intro' => 'It is reasonable to be sceptical of a free service that is supposed to look after your calendar. Here are honest answers to the questions people ask most often. If yours is missing, write to {email}.',
+                'sections' => [
+                    ['heading' => 'Who runs this?', 'items' => [
+                        'My name is {name}, and I run caldav.rpix.dk as a private individual in my spare time. There is no company, no investors and no customers behind it. You can write to me directly at {email}.',
+                    ]],
+                    ['heading' => 'Why is it free? What is the catch?', 'items' => [
+                        'It is a hobby project with no commercial purpose. There are no ads, no tracking and no analytics, and your information is never sold or shared with anyone.',
+                        'The catch is that there is no guarantee. The service is provided as is, with no promise of uptime or backup, and it is for private use only. See the {terms}. But you can expect high uptime and good service, just not a guarantee.',
+                    ]],
+                    ['heading' => 'Where is the server?', 'items' => [
+                        'At {hoster}. Data is not sent outside the EU/EEA. Every night a backup is made to a server in Denmark that I am personally responsible for.',
+                        'Emails from the service are sent directly from the server to your email provider, with no third-party mail service in between.',
+                    ]],
+                    ['heading' => 'Can you read my calendars, contacts and notes?', 'items' => [
+                        'Yes, technically. CalDAV and CardDAV have no end-to-end encryption. Data is encrypted on its way between you and the server (HTTPS), but it is stored unencrypted on the server\'s disk. The same is true for most other calendar providers.',
+                        'I do not open your content unless you ask for help, it is necessary to fix a fault, or the law requires it. But that is a promise, not a technical guarantee. Do not put anything on the server that you could not live with the administrator being able to see in principle.',
+                    ]],
+                    ['heading' => 'What is logged?', 'items' => [
+                        'Time, IP address, username, the server address that was requested, and the program used. The content of your events, contacts and notes is not in the logs. Web server logs are kept for at most {weblog} days, and calendar server logs for at most {serverlog} days.',
+                        'The portal only sets two necessary cookies: one to keep you logged in and one to remember your language.',
+                    ]],
+                    ['heading' => 'How is my password protected?', 'items' => [
+                        'It is stored as a bcrypt hash, so nobody can read it, including me. It must be at least {minpw} characters, and the portal temporarily blocks logins after too many failed attempts.',
+                        'There is no two-factor authentication, because calendar programs log in with a username and password. So use a password you do not use anywhere else.',
+                    ]],
+                    ['heading' => 'Can I leave again?', 'items' => [
+                        'Yes. Your data is stored in open standard formats (iCalendar and vCard), so you can move it to any other CalDAV/CardDAV server. You can export .ics and .vcf files from the Radicale web interface or from your calendar program.',
+                        'You can delete your account and all content on the {account} page. It is then deleted immediately on the server and disappears from the backups within {backup} days.',
+                    ]],
+                    ['heading' => 'What happens if you shut the service down?', 'items' => [
+                        'You will get at least 30 days\' notice by email, so you have time to move your data.',
+                        ['if' => 'inactive', 'paragraph' => 'Also note that accounts that have not been used for {inactive} days are deleted automatically. You will get an email first, and a calendar program syncing counts as use.'],
+                        'There is a limited number of places, so the server does not get overloaded and stays manageable for me to run.',
+                    ]],
+                    ['heading' => 'Can I see the code?', 'items' => [
+                        'The calendar server itself is {radicale}, a widely used open source server for CalDAV and CardDAV. I wrote the account portal, which handles sign-up, password reset and deletion, myself, and the code is at {source}. So is the code for {davnotes} and WebNotes.',
+                        'You cannot check for yourself that exactly this code is running on the server. But it is all open source, so you can read how it works and run it yourself.',
+                    ]],
+                    ['heading' => 'I would rather be in control myself', 'items' => [
+                        'Good. That is the best solution if you can. {radicale} is easy to install on your own server or a Raspberry Pi, and {davnotes} works with any CalDAV server that supports notes (VJOURNAL), such as Radicale and Nextcloud. caldav.rpix.dk is meant for those who do not want to, or cannot, run their own server.',
+                    ]],
+                    ['heading' => 'What happens if the server is hacked?', 'items' => [
+                        'If a security breach occurs that may affect your information, I will report it to Datatilsynet (the Danish Data Protection Agency), and you will be notified when the rules require it. Read more in the {privacy}.',
                     ]],
                 ],
             ],
