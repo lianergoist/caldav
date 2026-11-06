@@ -171,6 +171,23 @@ når `inactive_days` er over 0. Ret `legal_updated` og giv brugerne besked ved v
 `server_log_days` skal passe med journald, f.eks. `/etc/systemd/journald.conf.d/retention.conf`:
 `[Journal]` / `MaxRetentionSec=3month`, og derefter `systemctl restart systemd-journald`.
 
+## Venteliste
+
+Der er plads til `max_users` brugere (inkl. admin). Når der er fuldt, viser `register.php` i stedet en
+venteliste. Man skal bekræfte sin adresse via et link i en mail (`waitlist.php`), før man kommer på listen.
+
+- Bliver en plads ledig, får den første på listen en mail med et personligt link, der holder pladsen i
+  `waitlist_invite_days` dage. Med linket oprettes kontoen direkte. Bruges det ikke, går pladsen videre.
+- Pladser, der er lovet væk til ventelisten, kan ikke tages af almindelige tilmeldinger.
+- Alle mails fra ventelisten har et afmeldingslink.
+- Invitationer sendes, når nogen kommer på listen, sletter deres konto, og hver nat fra `bin/inactive.php`.
+  Hvis invitationer skal sendes hurtigere, fx når en invitation udløber, eller når `max_users` sættes op,
+  så kør `bin/waitlist.php` hver time som www-data, f.eks. i `/etc/cron.d/caldav-waitlist`:
+
+  ```
+  23 * * * * www-data /usr/bin/php /var/www/rpix.dk/caldav/bin/waitlist.php 2>&1 | /usr/bin/logger -t caldav-waitlist
+  ```
+
 ## Sletning af inaktive konti
 
 `bin/inactive.php` køres hver nat kl. 4.17 som root fra `/etc/cron.d/caldav-inactive`. Loggen ses med

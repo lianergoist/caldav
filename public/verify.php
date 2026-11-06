@@ -42,6 +42,7 @@ switch ($state) {
         break;
     case 'full':
         msg(t('reg_closed'));
+        echo '<p><a href="register.php">' . th('wl_title') . '</a></p>';
         break;
     case 'expired':
         msg(t('ver_expired'));

@@ -28,6 +28,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             activity_forget($user);
             do_logout();
             $deleted = true;
+            try {
+                waitlist_send_invites(); // den ledige plads går til den næste på ventelisten
+            } catch (Throwable $e) {
+                error_log('caldav waitlist: ' . $e->getMessage()); // cron prøver igen inden for en time
+            }
         }
     }
 }

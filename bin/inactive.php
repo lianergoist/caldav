@@ -291,6 +291,15 @@ if (!$dryRun && is_dir($quarantineDir)) {
     }
 }
 
+/* ---------- 5. venteliste: ledige pladser går til de næste i køen, udløbne invitationer ryddes ---------- */
+
+if (!$dryRun) {
+    $invitesSent = waitlist_send_invites();
+    if ($invitesSent > 0) {
+        out("Venteliste: $invitesSent invitation(er) sendt.");
+    }
+}
+
 out(sprintf('Færdig: %d advaret, %d slettet.', $dryRun ? 0 : count($toWarn), count($deleted)));
 if ($deleted) {
     admin_mail(count($deleted) . ' konto(er) slettet', implode("\n", $log));

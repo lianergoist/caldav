@@ -72,6 +72,8 @@ function legal_fill(string $html): string
         '{source}'       => '<a href="https://github.com/lianergoist/caldav">github.com/lianergoist/caldav</a>',
         '{radicale}'     => '<a href="https://radicale.org">Radicale</a>',
         '{davnotes}'     => '<a href="davnotes.php">DavNotes</a>',
+        '{maxusers}'     => number_format((int)cfg('max_users'), 0, ',', lang() === 'da' ? '.' : ','),
+        '{invitedays}'   => (string)max(1, (int)cfg_or('waitlist_invite_days', 7)),
     ]);
 }
 
@@ -129,9 +131,10 @@ function legal_texts(): array
                         'Tekniske logs: tidspunkt, IP-adresse, brugernavn, hvilken adresse på serveren der blev spurgt efter, og hvilket program der blev brugt (f.eks. DAVx⁵ eller Thunderbird).',
                         'Ved tilmelding og nulstilling: et engangslink og, ved tilmelding, din adgangskode som hash, indtil du har bekræftet kontoen.',
                         'Til beskyttelse mod misbrug: din IP-adresse og e-mailadresse sammen med tidspunktet for forsøg på tilmelding, login og nulstilling.',
+                        'Hvis du står på ventelisten: din e-mailadresse, tidspunktet du kom på listen, dit sprogvalg, og om du har fået en invitation.',
                     ]]]],
                     ['heading' => 'Hvorfor, og med hvilken ret', 'items' => [['list' => [
-                        'Konto, adgangskode og dit indhold behandles for at kunne levere den tjeneste, du har bedt om (GDPR artikel 6, stk. 1, litra b).',
+                        'Konto, adgangskode og dit indhold behandles for at kunne levere den tjeneste, du har bedt om (GDPR artikel 6, stk. 1, litra b). Det samme gælder ventelisten, som du selv har bedt om at komme på.',
                         'Logs og oplysninger til beskyttelse mod misbrug behandles for at holde tjenesten sikker og stabil. Det er en legitim interesse (artikel 6, stk. 1, litra f).',
                         'Oplysningerne bruges ikke til markedsføring, profilering eller statistik om dig, og de sælges eller deles ikke med andre.',
                     ]]]],
@@ -149,6 +152,7 @@ function legal_texts(): array
                         'Webserverens logs: op til {weblog} dage.',
                         'Kalenderserverens logs: op til {serverlog} dage.',
                         'Engangslinks: til de er brugt eller udløbet, højst {regttl} timer. Oplysninger til beskyttelse mod misbrug: 24 timer.',
+                        'Ventelisten: indtil du opretter en konto, melder dig af listen, eller en invitation til dig udløber efter {invitedays} dage uden at være brugt.',
                         'Sikkerhedskopier: op til {backup} dage. Derefter er de oplysninger, der er slettet på serveren, også væk fra sikkerhedskopierne.',
                         'Når du sletter din konto, slettes konto og indhold med det samme på serveren og forsvinder fra sikkerhedskopierne inden for {backup} dage. Det kan ikke fortrydes.',
                     ]]]],
@@ -240,7 +244,7 @@ function legal_texts(): array
                     ['heading' => 'Hvad sker der, hvis du lukker tjenesten?', 'items' => [
                         'Så får du mindst 30 dages varsel på mail, så du kan nå at flytte dine data.',
                         ['if' => 'inactive', 'paragraph' => 'Bemærk også, at konti, der ikke har været brugt i {inactive} dage, slettes automatisk. Du får en mail inden, og det tæller som brug, når et kalenderprogram synkroniserer.'],
-                        'Der er et begrænset antal pladser, så serveren ikke bliver overbelastet, og så jeg kan overskue at drive den.',
+                        'Der er plads til {maxusers} brugere, så serveren ikke bliver overbelastet. Er der fuldt, kan du skrive dig på ventelisten. Bliver en plads ledig, får den første på listen en mail og har {invitedays} dage til at oprette kontoen.',
                     ]],
                     ['heading' => 'Kan jeg se koden?', 'items' => [
                         'Selve kalenderserveren er {radicale}, en udbredt open source-server til CalDAV og CardDAV. Kontoportalen, som klarer tilmelding, nulstilling og sletning, har jeg skrevet selv, og koden ligger på {source}. Det samme gør koden til {davnotes} og WebNotes.',
@@ -270,9 +274,10 @@ function legal_texts(): array
                         'Technical logs: time, IP address, username, the server address that was requested, and the program used (e.g. DAVx⁵ or Thunderbird).',
                         'During sign-up and password reset: a one-time link and, during sign-up, your password as a hash until you confirm the account.',
                         'To prevent abuse: your IP address and email address together with the time of sign-up, login and reset attempts.',
+                        'If you are on the waiting list: your email address, the time you joined the list, your language, and whether you have been invited.',
                     ]]]],
                     ['heading' => 'Why, and on what legal basis', 'items' => [['list' => [
-                        'Your account, password and content are processed to provide the service you asked for (GDPR Article 6(1)(b)).',
+                        'Your account, password and content are processed to provide the service you asked for (GDPR Article 6(1)(b)). The same applies to the waiting list, which you asked to join.',
                         'Logs and abuse-prevention data are processed to keep the service secure and stable. This is a legitimate interest (Article 6(1)(f)).',
                         'The information is not used for marketing, profiling or statistics about you, and it is not sold or shared with anyone.',
                     ]]]],
@@ -290,6 +295,7 @@ function legal_texts(): array
                         'Web server logs: up to {weblog} days.',
                         'Calendar server logs: up to {serverlog} days.',
                         'One-time links: until used or expired, at most {regttl} hours. Abuse-prevention data: 24 hours.',
+                        'Waiting list: until you create an account, leave the list, or an invitation to you expires unused after {invitedays} days.',
                         'Backups: up to {backup} days. After that, information deleted on the server is also gone from the backups.',
                         'When you delete your account, the account and content are deleted immediately on the server and disappear from the backups within {backup} days. This cannot be undone.',
                     ]]]],
@@ -381,7 +387,7 @@ function legal_texts(): array
                     ['heading' => 'What happens if you shut the service down?', 'items' => [
                         'You will get at least 30 days\' notice by email, so you have time to move your data.',
                         ['if' => 'inactive', 'paragraph' => 'Also note that accounts that have not been used for {inactive} days are deleted automatically. You will get an email first, and a calendar program syncing counts as use.'],
-                        'There is a limited number of places, so the server does not get overloaded and stays manageable for me to run.',
+                        'There is room for {maxusers} users, so the server does not get overloaded. If it is full, you can join the waiting list. When a place becomes free, the first person on the list gets an email and has {invitedays} days to create the account.',
                     ]],
                     ['heading' => 'Can I see the code?', 'items' => [
                         'The calendar server itself is {radicale}, a widely used open source server for CalDAV and CardDAV. I wrote the account portal, which handles sign-up, password reset and deletion, myself, and the code is at {source}. So is the code for {davnotes} and WebNotes.',

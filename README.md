@@ -171,6 +171,24 @@ when `inactive_days` is above 0. Update `legal_updated` and notify users of sign
 `server_log_days` must match journald, e.g. `/etc/systemd/journald.conf.d/retention.conf`:
 `[Journal]` / `MaxRetentionSec=3month`, followed by `systemctl restart systemd-journald`.
 
+## Waiting list
+
+There is room for `max_users` users (including admin). When it is full, `register.php` shows a waiting list
+instead. People must confirm their address via a link in an email (`waitlist.php`) before they are added.
+
+- When a place becomes free, the first person on the list gets an email with a personal link that holds the
+  place for `waitlist_invite_days` days. The account is created directly with the link. If it is not used,
+  the place goes to the next person.
+- Places promised to the waiting list cannot be taken by ordinary sign-ups.
+- Every email from the waiting list has a link to leave it.
+- Invitations are sent when someone joins the list, when someone deletes their account, and every night from
+  `bin/inactive.php`. To send invitations sooner, e.g. when an invitation expires or `max_users` is raised,
+  run `bin/waitlist.php` hourly as www-data, e.g. in `/etc/cron.d/caldav-waitlist`:
+
+  ```
+  23 * * * * www-data /usr/bin/php /var/www/rpix.dk/caldav/bin/waitlist.php 2>&1 | /usr/bin/logger -t caldav-waitlist
+  ```
+
 ## Deleting inactive accounts
 
 `bin/inactive.php` runs every night at 4:17 as root from `/etc/cron.d/caldav-inactive`. The log can be viewed with
