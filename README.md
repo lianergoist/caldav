@@ -205,6 +205,47 @@ instead. People must confirm their address via a link in an email (`waitlist.php
 - `inactive_dry_run => true` only logs what would happen. `--dry-run` and `--live` on
   the command line override it.
 
+## Radicale in a virtualenv, and upgrading
+
+Ubuntu's Radicale package lags behind and lives in universe, where security fixes are not guaranteed.
+So Radicale runs from a virtualenv with a pinned version, e.g. `/opt/radicale-3.9.0`, and `/opt/radicale`
+is a symlink to the version in use. The systemd service (`/etc/systemd/system/radicale.service`) has
+`ExecStart=/opt/radicale/bin/python -m radicale`.
+
+```
+python3 -m venv /opt/radicale-3.9.0
+/opt/radicale-3.9.0/bin/pip install "radicale[bcrypt]==3.9.0"
+ln -sfn radicale-3.9.0 /opt/radicale
+```
+
+`bin/radicale-check.php` checks every week whether there is a new version on PyPI, and runs
+[pip-audit](https://pypi.org/project/pip-audit/) (installed in `/opt/pip-audit`) against Radicale's packages.
+It sends an email to `contact_email` but does not upgrade by itself, because even small Radicale releases
+can change config or behaviour. Cron, e.g. `/etc/cron.d/caldav-radicale-check`:
+
+```
+41 6 * * 1 www-data /usr/bin/php /var/www/rpix.dk/caldav/bin/radicale-check.php 2>&1 | /usr/bin/logger -t caldav-radicale-check
+```
+
+### Upgrading Radicale
+
+1. Read the [CHANGELOG](https://github.com/Kozea/Radicale/blob/master/CHANGELOG.md) for every version since
+   the installed one. Look especially for "Breaking", config changes, username rules, and changes to
+   htpasswd/bcrypt and to the log line `Successful login: '<user>' (`, which `bin/inactive.php` reads.
+2. Build the new version alongside: `python3 -m venv /opt/radicale-X.Y.Z` and
+   `/opt/radicale-X.Y.Z/bin/pip install "radicale[bcrypt]==X.Y.Z"`.
+3. Test on a copy of the data: copy `/var/lib/radicale/collections` to a temporary folder and run
+   `runuser -u radicale -- /opt/radicale-X.Y.Z/bin/python -m radicale --config /etc/radicale/config --storage-filesystem-folder <copy> --verify-storage`.
+   Optionally start a test server with `--server-hosts 127.0.0.1:5299` and a test htpasswd
+   (`--auth-htpasswd-filename`), and try logging in, creating a collection and deleting a user.
+   Delete the copy afterwards, as it contains users' data.
+4. `systemctl stop radicale`, make a backup
+   (`tar -czpf /root/radicale-backup-<date>.tar.gz /var/lib/radicale /etc/radicale /etc/systemd/system/radicale.service`),
+   switch the symlink with `ln -sfn radicale-X.Y.Z /opt/radicale`, and `systemctl start radicale`.
+5. Check `journalctl -u radicale` for errors and for `Successful login` from real users.
+6. Undo: `ln -sfn radicale-<old version> /opt/radicale` and `systemctl restart radicale`. If data has been
+   damaged, unpack the backup as well. The old folder can be deleted once the new one has run for a while.
+
 ## License
 
 MIT, see [LICENSE](LICENSE).

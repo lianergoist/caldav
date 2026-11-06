@@ -204,6 +204,47 @@ venteliste. Man skal bekræfte sin adresse via et link i en mail (`waitlist.php`
 - `inactive_dry_run => true` skriver kun i loggen, hvad der ville ske. `--dry-run` og `--live` på
   kommandolinjen overstyrer det.
 
+## Radicale i et virtualenv, og opgradering
+
+Ubuntus pakke med Radicale halter efter og ligger i universe, hvor sikkerhedsrettelser ikke er garanteret.
+Derfor kører Radicale fra et virtualenv med en fast version, f.eks. `/opt/radicale-3.9.0`, og
+`/opt/radicale` er et symlink til den version, der er i brug. Systemd-tjenesten
+(`/etc/systemd/system/radicale.service`) har `ExecStart=/opt/radicale/bin/python -m radicale`.
+
+```
+python3 -m venv /opt/radicale-3.9.0
+/opt/radicale-3.9.0/bin/pip install "radicale[bcrypt]==3.9.0"
+ln -sfn radicale-3.9.0 /opt/radicale
+```
+
+`bin/radicale-check.php` tjekker hver uge, om der er en ny version på PyPI, og kører
+[pip-audit](https://pypi.org/project/pip-audit/) (installeret i `/opt/pip-audit`) mod Radicales pakker.
+Den sender en mail til `contact_email`, men opgraderer ikke selv, for selv små versioner af Radicale kan
+ændre config eller adfærd. Cron, f.eks. `/etc/cron.d/caldav-radicale-check`:
+
+```
+41 6 * * 1 www-data /usr/bin/php /var/www/rpix.dk/caldav/bin/radicale-check.php 2>&1 | /usr/bin/logger -t caldav-radicale-check
+```
+
+### Opgradering af Radicale
+
+1. Læs [CHANGELOG](https://github.com/Kozea/Radicale/blob/master/CHANGELOG.md) for alle versioner siden
+   den installerede. Kig især efter "Breaking", config-ændringer, regler for brugernavne og ændringer i
+   htpasswd/bcrypt og i loglinjen `Successful login: '<bruger>' (`, som `bin/inactive.php` læser.
+2. Byg den nye version ved siden af: `python3 -m venv /opt/radicale-X.Y.Z` og
+   `/opt/radicale-X.Y.Z/bin/pip install "radicale[bcrypt]==X.Y.Z"`.
+3. Test på en kopi af data: kopiér `/var/lib/radicale/collections` til en midlertidig mappe og kør
+   `runuser -u radicale -- /opt/radicale-X.Y.Z/bin/python -m radicale --config /etc/radicale/config --storage-filesystem-folder <kopi> --verify-storage`.
+   Start eventuelt en testserver med `--server-hosts 127.0.0.1:5299` og en test-htpasswd
+   (`--auth-htpasswd-filename`), og prøv login, oprettelse af en samling og sletning af en bruger.
+   Slet kopien bagefter, for den indeholder brugernes data.
+4. `systemctl stop radicale`, tag en backup
+   (`tar -czpf /root/radicale-backup-<dato>.tar.gz /var/lib/radicale /etc/radicale /etc/systemd/system/radicale.service`),
+   skift symlinket med `ln -sfn radicale-X.Y.Z /opt/radicale`, og `systemctl start radicale`.
+5. Tjek `journalctl -u radicale` for fejl og for `Successful login` fra rigtige brugere.
+6. Fortryd: `ln -sfn radicale-<gammel version> /opt/radicale` og `systemctl restart radicale`. Er data
+   blevet ødelagt, så pak også backuppen ud. Den gamle mappe kan slettes, når den nye har kørt et stykke tid.
+
 ## Licens
 
 MIT, se [LICENSE](LICENSE).
