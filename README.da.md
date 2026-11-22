@@ -188,6 +188,12 @@ venteliste. Man skal bekræfte sin adresse via et link i en mail (`waitlist.php`
   23 * * * * www-data /usr/bin/php /var/www/rpix.dk/caldav/bin/waitlist.php 2>&1 | /usr/bin/logger -t caldav-waitlist
   ```
 
+## Statistik
+
+`php bin/stats.php` viser antal brugere i forhold til `max_users`, ledige pladser, ventelisten og hvor
+mange der har været aktive de sidste 7, 30 og 90 dage. Den viser kun tal, ingen adresser, og ændrer
+ikke noget. Aktiviteten opdateres hver nat af `bin/inactive.php`.
+
 ## Sletning af inaktive konti
 
 `bin/inactive.php` køres hver nat kl. 4.17 som root fra `/etc/cron.d/caldav-inactive`. Loggen ses med

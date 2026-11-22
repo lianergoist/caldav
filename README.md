@@ -189,6 +189,12 @@ instead. People must confirm their address via a link in an email (`waitlist.php
   23 * * * * www-data /usr/bin/php /var/www/rpix.dk/caldav/bin/waitlist.php 2>&1 | /usr/bin/logger -t caldav-waitlist
   ```
 
+## Statistics
+
+`php bin/stats.php` shows the number of users against `max_users`, free places, the waiting list and how
+many have been active in the last 7, 30 and 90 days. It only shows numbers, no addresses, and changes
+nothing. Activity is updated every night by `bin/inactive.php`.
+
 ## Deleting inactive accounts
 
 `bin/inactive.php` runs every night at 4:17 as root from `/etc/cron.d/caldav-inactive`. The log can be viewed with
