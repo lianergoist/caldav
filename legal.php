@@ -20,7 +20,7 @@ function legal_cfg(string $key)
         'web_log_days'     => 31,
         'server_log_days'  => 90,
         'inactive_days'    => 0,
-        'legal_updated'    => '2026-11-01',
+        'legal_updated'    => '2026-11-22',
     ];
     return $CONFIG[$key] ?? $defaults[$key];
 }
@@ -119,7 +119,7 @@ function legal_texts(): array
     return [
         'da' => [
             'privacy' => [
-                'intro' => 'Her kan du læse, hvilke oplysninger caldav.rpix.dk behandler om dig, hvorfor, og hvor længe de gemmes. Sidst opdateret {updated}.',
+                'intro' => 'Her kan du læse, hvilke oplysninger caldav.rpix.dk behandler om dig, hvorfor, og hvor længe de gemmes. Tjenesten er ikke beregnet til børn under 13 år. Sidst opdateret {updated}.',
                 'sections' => [
                     ['heading' => 'Dataansvarlig', 'items' => [
                         'Tjenesten drives af {name} som privatperson. Kontakt: {email}.',
@@ -127,9 +127,9 @@ function legal_texts(): array
                     ['heading' => 'Hvilke oplysninger', 'items' => [['list' => [
                         'Din e-mailadresse, som også er dit brugernavn.',
                         'Din adgangskode, gemt som en bcrypt-hash. Selve adgangskoden kan ikke læses af nogen, heller ikke af administratoren.',
-                        'Det du selv lægger på serveren: kalendere, aftaler, opgaver, noter og kontakter. Kontakter kan indeholde oplysninger om andre end dig.',
+                        'Det du selv lægger på serveren: kalendere, aftaler, opgaver, noter og kontakter.',
                         'Tekniske logs: tidspunkt, IP-adresse, brugernavn, hvilken adresse på serveren der blev spurgt efter, og hvilket program der blev brugt (f.eks. DAVx⁵ eller Thunderbird).',
-                        'Ved tilmelding og nulstilling: et engangslink og, ved tilmelding, din adgangskode som hash, indtil du har bekræftet kontoen.',
+                        'Ved tilmelding og nulstilling: et engangslink og, ved tilmelding, din adgangskode som hash. Begge slettes, når du har brugt linket, eller når det er udløbet.',
                         'Til beskyttelse mod misbrug: din IP-adresse og e-mailadresse sammen med tidspunktet for forsøg på tilmelding, login og nulstilling.',
                         'Hvis du står på ventelisten: din e-mailadresse, tidspunktet du kom på listen, dit sprogvalg, og om du har fået en invitation.',
                     ]]]],
@@ -139,7 +139,9 @@ function legal_texts(): array
                         'Oplysningerne bruges ikke til markedsføring, profilering eller statistik om dig, og de sælges eller deles ikke med andre.',
                     ]]]],
                     ['heading' => 'Dit indhold', 'items' => [
-                        'Kalendere kan indeholde følsomme oplysninger, f.eks. om helbred. Du bestemmer selv, hvad du lægger på serveren. Administratoren har teknisk adgang til serveren, men åbner ikke dit indhold, medmindre du selv beder om hjælp, eller det er nødvendigt for at rette en fejl eller opfylde et lovkrav.',
+                        'Du bestemmer selv, hvad du lægger på serveren. Tjenesten beder ikke om følsomme oplysninger, f.eks. om helbred, og bruger dem ikke til noget. Står de i dine kalendere, noter eller kontakter, opbevares de kun for din skyld og behandles som alt andet indhold.',
+                        'Dine kontakter og aftaler kan indeholde oplysninger om andre mennesker. Dem har du selv ansvaret for, ligesom i en papirkalender eller adressebog. Tjenesten opbevarer dem kun for dig og bruger dem ikke til andet.',
+                        'Administratoren har teknisk adgang til serveren, men åbner ikke dit indhold, medmindre du selv beder om hjælp, eller det er nødvendigt for at rette en fejl eller opfylde et lovkrav.',
                         'Data krypteres, mens de sendes mellem dig og serveren (HTTPS), men de er ikke krypteret på serverens disk.',
                     ]],
                     ['heading' => 'Hvor data opbevares', 'items' => [
@@ -152,6 +154,7 @@ function legal_texts(): array
                         'Webserverens logs: op til {weblog} dage.',
                         'Kalenderserverens logs: op til {serverlog} dage.',
                         'Engangslinks: til de er brugt eller udløbet, højst {regttl} timer. Oplysninger til beskyttelse mod misbrug: 24 timer.',
+                        'Ubekræftede tilmeldinger: højst {regttl} timer og derefter slettet. Der oprettes ingen konto, før du har bekræftet din e-mailadresse.',
                         'Ventelisten: indtil du opretter en konto, melder dig af listen, eller en invitation til dig udløber efter {invitedays} dage uden at være brugt.',
                         'Sikkerhedskopier: op til {backup} dage. Derefter er de oplysninger, der er slettet på serveren, også væk fra sikkerhedskopierne.',
                         'Når du sletter din konto, slettes konto og indhold med det samme på serveren og forsvinder fra sikkerhedskopierne inden for {backup} dage. Det kan ikke fortrydes.',
@@ -187,6 +190,7 @@ function legal_texts(): array
                         'Brug ikke tjenesten til noget, hvor det kan få alvorlige følger, hvis data forsvinder eller er utilgængelige i en periode.',
                     ]]]],
                     ['heading' => 'Din konto', 'items' => [['list' => [
+                        'Du skal være mindst 13 år for at oprette en konto.',
                         'Du skal bruge en e-mailadresse, du selv har adgang til.',
                         'Du har selv ansvaret for at vælge en sikker adgangskode og holde den hemmelig.',
                         'Kontoen er personlig og må ikke deles med andre eller overdrages.',
@@ -262,7 +266,7 @@ function legal_texts(): array
 
         'en' => [
             'privacy' => [
-                'intro' => 'This page explains what information caldav.rpix.dk processes about you, why, and for how long it is kept. Last updated {updated}.',
+                'intro' => 'This page explains what information caldav.rpix.dk processes about you, why, and for how long it is kept. The service is not intended for children under 13. Last updated {updated}.',
                 'sections' => [
                     ['heading' => 'Data controller', 'items' => [
                         'The service is run by {name} as a private individual. Contact: {email}.',
@@ -270,9 +274,9 @@ function legal_texts(): array
                     ['heading' => 'What information', 'items' => [['list' => [
                         'Your email address, which is also your username.',
                         'Your password, stored as a bcrypt hash. The password itself cannot be read by anyone, including the administrator.',
-                        'What you put on the server yourself: calendars, events, tasks, notes and contacts. Contacts may contain information about people other than you.',
+                        'What you put on the server yourself: calendars, events, tasks, notes and contacts.',
                         'Technical logs: time, IP address, username, the server address that was requested, and the program used (e.g. DAVx⁵ or Thunderbird).',
-                        'During sign-up and password reset: a one-time link and, during sign-up, your password as a hash until you confirm the account.',
+                        'During sign-up and password reset: a one-time link and, during sign-up, your password as a hash. Both are deleted once you have used the link or when it has expired.',
                         'To prevent abuse: your IP address and email address together with the time of sign-up, login and reset attempts.',
                         'If you are on the waiting list: your email address, the time you joined the list, your language, and whether you have been invited.',
                     ]]]],
@@ -282,7 +286,9 @@ function legal_texts(): array
                         'The information is not used for marketing, profiling or statistics about you, and it is not sold or shared with anyone.',
                     ]]]],
                     ['heading' => 'Your content', 'items' => [
-                        'Calendars can contain sensitive information, for example about health. You decide what you put on the server. The administrator has technical access to the server but does not open your content unless you ask for help, or it is necessary to fix a fault or comply with the law.',
+                        'You decide what you put on the server. The service does not ask for sensitive information, such as health details, and does not use it for anything. If such information is in your calendars, notes or contacts, it is stored only for you and handled like any other content.',
+                        'Your contacts and events may contain information about other people. You are responsible for it, just as in a paper diary or address book. The service only stores it for you and does not use it for anything else.',
+                        'The administrator has technical access to the server but does not open your content unless you ask for help, or it is necessary to fix a fault or comply with the law.',
                         'Data is encrypted while it travels between you and the server (HTTPS), but it is not encrypted on the server\'s disk.',
                     ]],
                     ['heading' => 'Where data is stored', 'items' => [
@@ -295,6 +301,7 @@ function legal_texts(): array
                         'Web server logs: up to {weblog} days.',
                         'Calendar server logs: up to {serverlog} days.',
                         'One-time links: until used or expired, at most {regttl} hours. Abuse-prevention data: 24 hours.',
+                        'Unconfirmed sign-ups: no more than {regttl} hours, then deleted. No account is created until you have confirmed your email address.',
                         'Waiting list: until you create an account, leave the list, or an invitation to you expires unused after {invitedays} days.',
                         'Backups: up to {backup} days. After that, information deleted on the server is also gone from the backups.',
                         'When you delete your account, the account and content are deleted immediately on the server and disappear from the backups within {backup} days. This cannot be undone.',
@@ -330,6 +337,7 @@ function legal_texts(): array
                         'Do not use the service for anything where lost or temporarily unavailable data could have serious consequences.',
                     ]]]],
                     ['heading' => 'Your account', 'items' => [['list' => [
+                        'You must be at least 13 years old to create an account.',
                         'You must use an email address you have access to.',
                         'You are responsible for choosing a secure password and keeping it secret.',
                         'The account is personal and may not be shared or transferred.',
